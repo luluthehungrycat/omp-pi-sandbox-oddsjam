@@ -3,8 +3,8 @@
  * prompt.ts — this file only translates keyboard events and renders.
  */
 
-import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Key, matchesKey, truncateToWidth } from "@earendil-works/pi-tui";
+import type { ExtensionContext } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
+import { Key, matchesKey, truncateToWidth } from "@oh-my-pi/pi-tui";
 
 import {
   type PromptAction,

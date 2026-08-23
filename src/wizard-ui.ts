@@ -9,8 +9,8 @@
  *   3. List editor — shown when entering a list field.
  */
 
-import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
-import { Key, matchesKey, truncateToWidth } from "@earendil-works/pi-tui";
+import type { ExtensionCommandContext } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
+import { Key, matchesKey, truncateToWidth } from "@oh-my-pi/pi-tui";
 
 import type { ScopeOption as ScopeOptionT } from "./wizard.ts";
 

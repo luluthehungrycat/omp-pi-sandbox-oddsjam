@@ -19,19 +19,16 @@
  *   /sandbox-configure  — interactive TUI wizard to edit configs
  */
 
-import type {
-  AgentToolResult,
-  ExtensionAPI,
-  ExtensionContext,
-} from "@earendil-works/pi-coding-agent";
+import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
+import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
 
 import { homedir } from "node:os";
 
 import { SandboxManager, type SandboxAskCallback } from "@anthropic-ai/sandbox-runtime";
 import {
   createBashToolDefinition,
-  isToolCallEventType,
-} from "@earendil-works/pi-coding-agent";
+} from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
+import { isToolCallEventType } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
 
 import { createSandboxedBashOps } from "./src/bash-ops.ts";
 import {
@@ -457,36 +454,6 @@ export default function (pi: ExtensionAPI): void {
       }
     }
     return undefined;
-  });
-
-  // ── user_bash (network pre-check for !cmd) ─────────────────────────────────
-
-  pi.on("user_bash", async (event, ctx) => {
-    if (!flags.enabled.value || !flags.initialized.value) return;
-    const { effective } = loadEffective(ctx.cwd);
-    const domains = extractDomainsFromCommand(event.command);
-    const allowed = effective.network?.allowedDomains ?? [];
-    for (const domain of domains) {
-      if (!domainIsAllowed(domain, allowed)) {
-        const status = await promptAndApply(
-          ctx,
-          `🌐 Network blocked: "${domain}" is not in allowedDomains`,
-          "domain",
-          domain,
-        );
-        if (status === "blocked") {
-          return {
-            result: {
-              output: `Blocked: "${domain}" is not in allowedDomains. Use /sandbox-configure to review your config.`,
-              exitCode: 1,
-              cancelled: false,
-              truncated: false,
-            },
-          };
-        }
-      }
-    }
-    return { operations: createSandboxedBashOps(userShellPath) };
   });
 
   // ── bash tool override with retry-after-allow ──────────────────────────────
