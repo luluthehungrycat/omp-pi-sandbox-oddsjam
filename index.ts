@@ -31,7 +31,6 @@ import { SandboxManager, type SandboxAskCallback } from "@anthropic-ai/sandbox-r
 import {
   createBashToolDefinition,
   isToolCallEventType,
-  SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 
 import { createSandboxedBashOps } from "./src/bash-ops.ts";
@@ -90,8 +89,8 @@ export default function (pi: ExtensionAPI): void {
   const home = homedir();
   const paths = getConfigPaths(home);
   const localCwd = process.cwd();
-  const userShellPath = SettingsManager.create(localCwd).getShellPath();
-  const localBash = createBashToolDefinition(localCwd, { shellPath: userShellPath });
+  const userShellPath = process.env.SHELL || "/bin/sh";
+  const localBash = createBashToolDefinition(localCwd);
 
   // ── shared mutable state ────────────────────────────────────────────────────
 
@@ -215,7 +214,11 @@ export default function (pi: ExtensionAPI): void {
     try {
       await SandboxManager.initialize(
         {
-          network: effective.network,
+          network: {
+            ...effective.network,
+            allowUnixSockets: [],
+            allowAllUnixSockets: false,
+          },
           filesystem: effective.filesystem,
           ignoreViolations: effective.ignoreViolations,
           enableWeakerNestedSandbox: effective.enableWeakerNestedSandbox,
@@ -498,7 +501,6 @@ export default function (pi: ExtensionAPI): void {
         }
         const sandboxedBash = createBashToolDefinition(localCwd, {
           operations: createSandboxedBashOps(userShellPath),
-          shellPath: userShellPath,
         });
         return sandboxedBash.execute(id, params, signal, onUpdate, ctx);
       };
