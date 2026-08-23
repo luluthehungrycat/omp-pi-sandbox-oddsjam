@@ -1,16 +1,16 @@
 {
-  "name": "@oddsjam/pi-sandbox",
-  "version": "0.1.0",
+  "name": "@luluthehungrycat/omp-pi-sandbox-oddsjam",
+  "version": "0.1.1",
   "description": "OS-level sandbox for pi using @anthropic-ai/sandbox-runtime, with an in-pi configure wizard, shift+tab toggle, and longest-prefix project configs.",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oddsjam/pi-sandbox.git"
+    "url": "git+ssh://git@github.com/luluthehungrycat/omp-pi-sandbox-oddsjam.git"
   },
-  "homepage": "https://github.com/oddsjam/pi-sandbox#readme",
+  "homepage": "https://github.com/luluthehungrycat/omp-pi-sandbox-oddsjam#readme",
   "bugs": {
-    "url": "https://github.com/oddsjam/pi-sandbox/issues"
+    "url": "https://github.com/luluthehungrycat/omp-pi-sandbox-oddsjam/issues"
   },
   "keywords": [
     "pi-package",
@@ -37,9 +37,13 @@
     ],
     "image": "./screenshots/sandbox-configure.png"
   },
+  "omp": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "test": "bun test",

@@ -194,16 +194,29 @@ zackify-pi-sandbox/                  # folder on disk (kept unchanged for sync s
 
 There is no keyboard shortcut for toggling. The single `/sandbox` Enter path is fast enough and avoids fighting with pi's built-in `app.thinking.cycle` (shift+tab) keybinding. To make the sandbox stay off across sessions, edit `enabled: false` in the relevant config via the same `/sandbox` wizard.
 
-## Install
+## Install with OMP
 
-Auto-discovered when placed at `~/.pi/agent/extensions/zackify-pi-sandbox/` (the folder name on disk is unchanged; the npm-style `name` in `package.json` is `@oddsjam/pi-sandbox`). Sync `~/.pi/` to other machines and pi picks it up there too.
+Configure GitHub Packages authentication once:
 
 ```bash
-cd ~/.pi/agent/extensions/zackify-pi-sandbox
-bun install
+npm config set @luluthehungrycat:registry https://npm.pkg.github.com
+npm config set //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
 ```
 
-`@anthropic-ai/sandbox-runtime` is listed in `trustedDependencies` so bun doesn't block its install lifecycle.
+Install and verify through OMP:
+
+```bash
+omp plugin install @luluthehungrycat/omp-pi-sandbox-oddsjam
+omp plugin doctor
+```
+
+For direct GitHub installation:
+
+```bash
+omp plugin install git+ssh://git@github.com/luluthehungrycat/omp-pi-sandbox-oddsjam.git#v0.1.1
+```
+
+The package manifest declares both `pi.extensions` and `omp.extensions`, so OMP discovers the extension automatically after plugin installation. `@anthropic-ai/sandbox-runtime` is listed in `trustedDependencies` so Bun doesn't block its install lifecycle.
 
 ### Prerequisites
 
