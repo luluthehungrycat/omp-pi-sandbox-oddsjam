@@ -1,0 +1,53 @@
+name: Release Verification
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      PLUGIN_REPOSITORY: luluthehungrycat/omp-pi-sandbox-oddsjam
+      PACKAGE_NAME: '@luluthehungrycat/omp-pi-sandbox-oddsjam'
+      PACKAGE_VERSION: '0.1.1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: luluthehungrycat/omp-pi-sandbox-infra
+          path: infra
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - name: Install OMP
+        run: bun install --global @oh-my-pi/pi-coding-agent@18.0.0
+      - name: Verify public Git installation without token
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOME_DIR="$(mktemp -d)"
+          trap 'rm -rf "$HOME_DIR"' EXIT
+          HOME="$HOME_DIR" XDG_CONFIG_HOME="$HOME_DIR/config" XDG_DATA_HOME="$HOME_DIR/data" XDG_CACHE_HOME="$HOME_DIR/cache" BUN_INSTALL_CACHE_DIR="$HOME_DIR/bun-cache" env -u GITHUB_TOKEN -u GH_TOKEN omp plugin install "github:${PLUGIN_REPOSITORY}#${GITHUB_REF_NAME}"
+          HOME="$HOME_DIR" XDG_CONFIG_HOME="$HOME_DIR/config" XDG_DATA_HOME="$HOME_DIR/data" XDG_CACHE_HOME="$HOME_DIR/cache" BUN_INSTALL_CACHE_DIR="$HOME_DIR/bun-cache" env -u GITHUB_TOKEN -u GH_TOKEN omp plugin doctor
+      - name: Verify GitHub Packages installation
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          HOME_DIR="$(mktemp -d)"
+          trap 'rm -rf "$HOME_DIR"' EXIT
+          printf '@luluthehungrycat:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$GITHUB_TOKEN" > "$HOME_DIR/.npmrc"
+          HOME="$HOME_DIR" XDG_CONFIG_HOME="$HOME_DIR/config" XDG_DATA_HOME="$HOME_DIR/data" XDG_CACHE_HOME="$HOME_DIR/cache" BUN_INSTALL_CACHE_DIR="$HOME_DIR/bun-cache" omp plugin install "${PACKAGE_NAME}@${PACKAGE_VERSION}"
+          HOME="$HOME_DIR" XDG_CONFIG_HOME="$HOME_DIR/config" XDG_DATA_HOME="$HOME_DIR/data" XDG_CACHE_HOME="$HOME_DIR/cache" BUN_INSTALL_CACHE_DIR="$HOME_DIR/bun-cache" omp plugin doctor
+      - name: Verify Podman containment boundary
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          ./infra/test-result/portable-podman-boundary.sh "$GITHUB_WORKSPACE"
