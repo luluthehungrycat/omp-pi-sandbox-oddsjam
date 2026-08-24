@@ -1,0 +1,39 @@
+name: OMP Compatibility Matrix
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        omp: ['18.0.0', '18.0.4']
+        bun: ['1.4.0']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun }}
+      - run: bun install --global @oh-my-pi/pi-coding-agent@${{ matrix.omp }}
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+  plugin-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        omp: ['18.0.0', '18.0.4']
+        bun: ['1.4.0']
+    uses: luluthehungrycat/omp-pi-sandbox-infra/.github/workflows/reusable-plugin-smoke.yml@main
+    with:
+      plugin_repository: luluthehungrycat/omp-pi-sandbox-oddsjam
+      omp_version: ${{ matrix.omp }}
+      bun_version: ${{ matrix.bun }}
