@@ -15,7 +15,6 @@ jobs:
     env:
       PLUGIN_REPOSITORY: luluthehungrycat/omp-pi-sandbox-oddsjam
       PACKAGE_NAME: '@luluthehungrycat/omp-pi-sandbox-oddsjam'
-      PACKAGE_VERSION: '0.1.1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -41,6 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
           HOME_DIR="$(mktemp -d)"
           trap 'rm -rf "$HOME_DIR"' EXIT
           printf '@luluthehungrycat:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$GITHUB_TOKEN" > "$HOME_DIR/.npmrc"
